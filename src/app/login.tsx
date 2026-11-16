@@ -1,9 +1,8 @@
 import { loginUser } from "@/api/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useAuth } from "./_layout";
+import { useState } from "react";
+
 import {
-  ActivityIndicator,
   Alert,
   Button,
   Text,
@@ -12,48 +11,24 @@ import {
 } from "react-native";
 
 export default function LoginScreen() {
-  const [username, setUsername] = useState<string>("emilys");
-  const [password, setPassword] = useState<string>("emilyspass");
+  const { login } = useAuth();
 
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-
-        if (token) {
-          router.replace("/");
-          return;
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    checkToken();
-  }, []);
+  const [username, setUsername] = useState("emilys");
+  const [password, setPassword] = useState("emilyspass");
 
   const handleLogin = async () => {
     try {
       const res = await loginUser(username, password);
 
       if (res.accessToken) {
-        await AsyncStorage.setItem("token", res.accessToken);
-        router.replace("/");
+        await login(res.accessToken);
       } else {
-        Alert.alert("Error", "Invalid Credentials!");
+        Alert.alert("Error", "Invalid credentials!");
       }
     } catch (error) {
       Alert.alert("Error", "There is a problem in login!");
     }
   };
-
-  if (loading) {
-    return <ActivityIndicator size="large" />;
-  }
 
   return (
     <View style={{ padding: 20 }}>
@@ -66,6 +41,7 @@ export default function LoginScreen() {
       />
 
       <Text>Password</Text>
+
       <TextInput
         value={password}
         onChangeText={setPassword}
@@ -73,7 +49,7 @@ export default function LoginScreen() {
         secureTextEntry
       />
 
-      <Button title="Sign IN" onPress={handleLogin}></Button>
+      <Button title="Sign In" onPress={handleLogin} />
     </View>
   );
 }
