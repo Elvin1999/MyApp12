@@ -7,5 +7,5 @@ export const getTodos = async (token: string) => {
     },
   });
 
-  return res.data.token;
+  return res.data;
 };
